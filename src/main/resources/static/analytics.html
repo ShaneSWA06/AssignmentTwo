@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MedCare | Global Analytics Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: { sans: ["Outfit", "sans-serif"] },
+            colors: {
+              brand: {
+                50: "#f0f7ff",
+                100: "#e0effe",
+                200: "#bae0fd",
+                300: "#7cc8fb",
+                400: "#38aaf7",
+                500: "#0e90e9",
+                600: "#0272c7",
+                700: "#035ba1",
+                800: "#074d85",
+                900: "#0c416e",
+              },
+              dark: {
+                base: "#0B0F1A",
+                elevated: "#151B2B",
+                border: "#1E293B",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background-color: #0b0f1a;
+        color: #f8fafc;
+      }
+      .glass {
+        background: rgba(21, 27, 43, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .stat-card {
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px -10px rgba(14, 144, 233, 0.3);
+      }
+      .animate-pulse-slow {
+        animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+    </style>
+  </head>
+  <body class="p-6 md:p-10">
+    <!-- Global Header -->
+    <header
+      class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6"
+    >
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <div
+            class="w-2 h-2 rounded-full bg-brand-500 animate-pulse-slow"
+          ></div>
+          <span
+            class="text-xs font-semibold uppercase tracking-widest text-brand-400"
+            >MedCare Intelligence</span
+          >
+        </div>
+        <h1
+          class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400"
+        >
+          Bookings & Sales Analytics
+        </h1>
+        <p class="text-gray-400 mt-2">
+          Strategic overview of MedCare operational performance and revenue
+          growth.
+        </p>
+      </div>
+      <div class="flex gap-4">
+        <button
+          onclick="fetchData()"
+          class="flex items-center gap-2 px-5 py-2.5 glass rounded-xl hover:bg-brand-500/10 transition-all border border-brand-500/20 text-brand-400 font-medium"
+        >
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh Data
+        </button>
+        <div
+          class="h-12 w-12 rounded-full glass flex items-center justify-center border border-white/10"
+        >
+          <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- KPI Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+      <!-- Revenue Card -->
+      <div
+        class="stat-card glass p-6 rounded-3xl relative overflow-hidden group"
+      >
+        <div
+          class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity"
+        >
+          <i data-lucide="dollar-sign" class="w-32 h-32"></i>
+        </div>
+        <div class="flex justify-between items-start mb-4">
+          <div
+            class="p-3 rounded-2xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+          >
+            <i data-lucide="banknote" class="w-6 h-6"></i>
+          </div>
+          <span
+            class="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full"
+            >+12% vs LW</span
+          >
+        </div>
+        <p class="text-sm text-gray-400 font-medium mb-1">Total Revenue</p>
+        <h3 id="totalSales" class="text-3xl font-bold font-mono">$0.00</h3>
+      </div>
+
+      <!-- Bookings Card -->
+      <div
+        class="stat-card glass p-6 rounded-3xl relative overflow-hidden group"
+      >
+        <div
+          class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity text-brand-500"
+        >
+          <i data-lucide="calendar" class="w-32 h-32"></i>
+        </div>
+        <div class="flex justify-between items-start mb-4">
+          <div
+            class="p-3 rounded-2xl bg-brand-500/10 text-brand-500 border border-brand-500/20"
+          >
+            <i data-lucide="calendar" class="w-6 h-6"></i>
+          </div>
+          <span
+            class="text-xs font-bold text-brand-500 bg-brand-500/10 px-2 py-1 rounded-full"
+            >+5% vs LW</span
+          >
+        </div>
+        <p class="text-sm text-gray-400 font-medium mb-1">Total Bookings</p>
+        <h3 id="totalBookings" class="text-3xl font-bold font-mono">0</h3>
+      </div>
+
+      <!-- Success Rate Card -->
+      <div
+        class="stat-card glass p-6 rounded-3xl relative overflow-hidden group"
+      >
+        <div
+          class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity text-purple-500"
+        >
+          <i data-lucide="check-circle" class="w-32 h-32"></i>
+        </div>
+        <div class="flex justify-between items-start mb-4">
+          <div
+            class="p-3 rounded-2xl bg-purple-500/10 text-purple-500 border border-purple-500/20"
+          >
+            <i data-lucide="activity" class="w-6 h-6"></i>
+          </div>
+          <span
+            class="text-xs font-bold text-purple-500 bg-purple-500/10 px-2 py-1 rounded-full"
+            >Stable</span
+          >
+        </div>
+        <p class="text-sm text-gray-400 font-medium mb-1">Completion Rate</p>
+        <h3 id="completionRate" class="text-3xl font-bold font-mono">0%</h3>
+      </div>
+
+      <!-- Average Ticket Card -->
+      <div
+        class="stat-card glass p-6 rounded-3xl relative overflow-hidden group"
+      >
+        <div
+          class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity text-amber-500"
+        >
+          <i data-lucide="trending-up" class="w-32 h-32"></i>
+        </div>
+        <div class="flex justify-between items-start mb-4">
+          <div
+            class="p-3 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20"
+          >
+            <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+          </div>
+        </div>
+        <p class="text-sm text-gray-400 font-medium mb-1">Avg. Booking Value</p>
+        <h3 id="avgBookingValue" class="text-3xl font-bold font-mono">$0.00</h3>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+      <!-- Sales Trend -->
+      <div class="lg:col-span-2 glass p-8 rounded-3xl">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h4 class="text-xl font-bold">Revenue Growth</h4>
+            <p class="text-sm text-gray-400">
+              Monthly sales performance over the fiscal year.
+            </p>
+          </div>
+          <div class="flex gap-2 text-xs">
+            <span class="flex items-center gap-1"
+              ><div class="w-2 h-2 rounded-full bg-brand-500"></div>
+              Current Year</span
+            >
+          </div>
+        </div>
+        <div class="h-[350px]">
+          <canvas id="salesTrendsChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Status Distribution -->
+      <div class="glass p-8 rounded-3xl">
+        <h4 class="text-xl font-bold mb-1">Booking States</h4>
+        <p class="text-sm text-gray-400 mb-8">
+          Distribution of current job lifecycles.
+        </p>
+        <div class="h-[300px] flex items-center justify-center">
+          <canvas id="statusChart"></canvas>
+        </div>
+        <div id="statusLegend" class="mt-6 grid grid-cols-2 gap-4">
+          <!-- Dynamic Legend -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Tables -->
+    <div class="glass rounded-3xl overflow-hidden border border-white/5">
+      <div
+        class="p-8 border-b border-white/5 flex justify-between items-center"
+      >
+        <h4 class="text-xl font-bold">Recent High-Value Bookings</h4>
+        <button
+          onclick="exportToCSV()"
+          class="text-brand-400 text-sm font-bold hover:underline"
+        >
+          Export CSV
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr
+              class="bg-white/5 text-gray-400 text-xs uppercase tracking-wider"
+            >
+              <th class="px-8 py-4">Booking ID</th>
+              <th class="px-8 py-4">Client</th>
+              <th class="px-8 py-4">Date</th>
+              <th class="px-8 py-4">Value</th>
+              <th class="px-8 py-4 text-right">Status</th>
+            </tr>
+          </thead>
+          <tbody id="bookingsTable" class="text-sm">
+            <!-- Dynamic Content -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      lucide.createIcons();
+
+      let salesChart, statusChartObj;
+
+      async function fetchData() {
+        console.log(
+          "%c MedCare Debug: Starting Sync... ",
+          "background: #0e90e9; color: white; font-weight: bold;",
+        );
+        const btn = document.querySelector("button");
+        const icon = btn.querySelector("i");
+        if (icon) icon.classList.add("animate-spin");
+
+        try {
+          // Try to detect the API base path more reliably
+          const pathParts = window.location.pathname.split("/");
+          const contextPath = pathParts[1] ? `/${pathParts[1]}` : "";
+          console.log("Checking path:", `${contextPath}/api/analytics/summary`);
+
+          const [summaryRes, trendsRes, bookingsRes] = await Promise.all([
+            fetch(`${contextPath}/api/analytics/summary`).catch((e) => ({
+              error: true,
+              msg: e.message,
+            })),
+            fetch(`${contextPath}/api/analytics/sales-trends`).catch((e) => ({
+              error: true,
+              msg: e.message,
+            })),
+            fetch(`${contextPath}/api/bookings`).catch((e) => ({
+              error: true,
+              msg: e.message,
+            })),
+          ]);
+
+          if (summaryRes.error || trendsRes.error || bookingsRes.error) {
+            console.error(
+              "Network Error Detected. Is the Spring Boot server running?",
+            );
+            return;
+          }
+
+          if (!summaryRes.ok) {
+            console.error("API Summary error status:", summaryRes.status);
+          }
+
+          const summary = await summaryRes.json();
+          const trends = await trendsRes.json();
+          const bookings = await bookingsRes.json();
+
+          window.currentBookings = bookings; // Store for export
+
+          console.log("Analytics Heartbeat:", {
+            totalFound: summary.totalBookings,
+            salesTotal: summary.totalSales,
+            bookingsListSize: bookings.length,
+          });
+
+          updateKPIs(summary, bookings);
+          updateSalesTrendChart(trends);
+          updateStatusChart(summary.statusDistribution);
+          updateBookingsTable(bookings);
+        } catch (err) {
+          console.error("Dashboard logic failed:", err);
+        } finally {
+          if (icon)
+            setTimeout(() => icon.classList.remove("animate-spin"), 800);
+        }
+      }
+
+      function exportToCSV() {
+        if (!window.currentBookings || window.currentBookings.length === 0) {
+          alert("No data available to export.");
+          return;
+        }
+
+        const headers = [
+          "Booking ID",
+          "User ID",
+          "Service ID",
+          "Date",
+          "Time",
+          "Price",
+          "Status",
+          "Payment Status",
+        ];
+        const rows = window.currentBookings.map((b) => [
+          `BK-${b.bookingId}`,
+          b.userId,
+          b.serviceId,
+          b.bookingDate,
+          b.bookingTime,
+          (b.totalPrice || 0).toFixed(2),
+          b.status,
+          b.paymentStatus,
+        ]);
+
+        let csvContent =
+          "data:text/csv;charset=utf-8," +
+          headers.join(",") +
+          "\n" +
+          rows.map((r) => r.join(",")).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute(
+          "download",
+          `medcare_bookings_${new Date().toISOString().split("T")[0]}.csv`,
+        );
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      function updateKPIs(summary, bookings) {
+        document.getElementById("totalSales").textContent =
+          `$${summary.totalSales.toLocaleString()}`;
+        document.getElementById("totalBookings").textContent =
+          summary.totalBookings.toLocaleString();
+
+        const completed = summary.statusDistribution["Completed"] || 0;
+        const rate =
+          summary.totalBookings > 0
+            ? ((completed / summary.totalBookings) * 100).toFixed(1)
+            : 0;
+        document.getElementById("completionRate").textContent = `${rate}%`;
+
+        const avg =
+          summary.totalBookings > 0
+            ? (summary.totalSales / completed).toFixed(2)
+            : 0;
+        document.getElementById("avgBookingValue").textContent = `$${avg}`;
+      }
+
+      function updateSalesTrendChart(data) {
+        const ctx = document
+          .getElementById("salesTrendsChart")
+          .getContext("2d");
+        const labels = Object.keys(data);
+        const values = Object.values(data);
+
+        if (salesChart) salesChart.destroy();
+
+        salesChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Monthly Revenue",
+                data: values,
+                borderColor: "#0e90e9",
+                backgroundColor: (context) => {
+                  const chart = context.chart;
+                  const { ctx, chartArea } = chart;
+                  if (!chartArea) return null;
+                  const gradient = ctx.createLinearGradient(
+                    0,
+                    chartArea.top,
+                    0,
+                    chartArea.bottom,
+                  );
+                  gradient.addColorStop(0, "rgba(14, 144, 233, 0.4)");
+                  gradient.addColorStop(1, "rgba(14, 144, 233, 0)");
+                  return gradient;
+                },
+                fill: true,
+                tension: 0.4,
+                borderWidth: 3,
+                pointRadius: 4,
+                pointBackgroundColor: "#0e90e9",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: {
+                grid: { color: "rgba(255,255,255,0.05)" },
+                ticks: { color: "#64748b" },
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: "#64748b" },
+              },
+            },
+          },
+        });
+      }
+
+      function updateStatusChart(dist) {
+        const ctx = document.getElementById("statusChart").getContext("2d");
+        const labels = Object.keys(dist);
+        const values = Object.values(dist);
+        const colors = ["#facc15", "#60a5fa", "#4ade80", "#f472b6", "#94a3b8"];
+
+        if (statusChartObj) statusChartObj.destroy();
+
+        statusChartObj = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels,
+            datasets: [
+              {
+                data: values,
+                backgroundColor: colors,
+                borderWidth: 0,
+                hoverOffset: 10,
+              },
+            ],
+          },
+          options: {
+            cutout: "75%",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+          },
+        });
+
+        // Update Legend
+        const legend = document.getElementById("statusLegend");
+        legend.innerHTML = labels
+          .map(
+            (label, i) => `
+                <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 rounded-full" style="background-color: ${colors[i]}"></div>
+                    <span class="text-xs text-gray-400 capitalize">${label} (${values[i]})</span>
+                </div>
+            `,
+          )
+          .join("");
+      }
+
+      function updateBookingsTable(bookings) {
+        const table = document.getElementById("bookingsTable");
+        table.innerHTML = bookings
+          .slice(0, 5)
+          .map(
+            (b) => `
+                <tr class="border-t border-white/5 hover:bg-white/5 transition-colors">
+                    <td class="px-8 py-5 font-mono text-brand-400">BK-${b.bookingId}</td>
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xs">C${b.userId}</div>
+                            <span>Client #${b.userId}</span>
+                        </div>
+                    </td>
+                    <td class="px-8 py-5 text-gray-400">${b.bookingDate}</td>
+                    <td class="px-8 py-5 font-bold">$${(b.totalPrice || 0).toFixed(2)}</td>
+                    <td class="px-8 py-5 text-right">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${getStatusStyle(b.status)}">
+                            ${b.status}
+                        </span>
+                    </td>
+                </tr>
+            `,
+          )
+          .join("");
+      }
+
+      function getStatusStyle(status) {
+        switch (status?.toLowerCase()) {
+          case "completed":
+            return "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20";
+          case "confirmed":
+            return "bg-blue-500/10 text-blue-500 border border-blue-500/20";
+          case "in-progress":
+            return "bg-brand-500/10 text-brand-500 border border-brand-500/20";
+          default:
+            return "bg-amber-500/10 text-amber-500 border border-amber-500/20";
+        }
+      }
+
+      fetchData();
+      setInterval(fetchData, 30000); // Auto-refresh every 30s
+    </script>
+  </body>
+</html>
