@@ -23,8 +23,6 @@ public class Caregiver {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
     
-    @Column(name = "specialization", length = 100)
-    private String specialization;
     
     @Column(name = "phone", length = 20)
     private String phone;
@@ -32,7 +30,7 @@ public class Caregiver {
     @Column(name = "email", length = 100)
     private String email;
     
-    @Column(name = "is_available")
+    @Column(name = "available")
     private Boolean isAvailable = true;
     
     @Column(name = "qualifications", columnDefinition = "TEXT")
@@ -41,7 +39,7 @@ public class Caregiver {
     @Column(name = "specialties", columnDefinition = "TEXT")
     private String specialties;
     
-    @Column(name = "experience_years")
+    @Column(name = "experience")
     private Integer experienceYears;
     
     @Column(name = "bio", columnDefinition = "TEXT")
@@ -98,13 +96,6 @@ public class Caregiver {
         this.name = name;
     }
 
-    public String getSpecialization() {
-        return specialization;
-    }
-
-    public void setSpecialization(String specialization) {
-        this.specialization = specialization;
-    }
 
     public String getPhone() {
         return phone;
