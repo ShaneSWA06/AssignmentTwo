@@ -16,7 +16,11 @@ public class Booking {
     
     @Column(name = "user_id", nullable = false)
     private Integer userId;
-    
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private AppUser user;
+
     @Column(name = "service_id", nullable = false)
     private Integer serviceId;
     
@@ -110,7 +114,11 @@ public class Booking {
     public void setUserId(Integer userId) {
         this.userId = userId;
     }
-    
+
+    public AppUser getUser() {
+        return user;
+    }
+
     public Integer getServiceId() {
         return serviceId;
     }
