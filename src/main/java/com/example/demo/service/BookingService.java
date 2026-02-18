@@ -195,6 +195,7 @@ public class BookingService {
             booking.setClockInTime(LocalDateTime.now());
             booking.setClockInLocation(location);
             booking.setStatus("In-Progress");
+            booking.setCaregiverStatus("In-Progress");
             return bookingRepository.save(booking);
         }
         return null;
@@ -210,6 +211,7 @@ public class BookingService {
             booking.setClockOutTime(LocalDateTime.now());
             booking.setClockOutLocation(location);
             booking.setStatus("Completed");
+            booking.setCaregiverStatus("Completed");
             return bookingRepository.save(booking);
         }
         return null;
