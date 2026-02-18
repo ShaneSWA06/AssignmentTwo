@@ -124,7 +124,7 @@ public class BookingService {
     }
     
     /**
-     * Update booking status
+     * Update booking status — also syncs caregiverStatus to match
      */
     public Booking updateBookingStatus(Integer id, String status) {
         Optional<Booking> optionalBooking = bookingRepository.findById(id);
@@ -132,6 +132,16 @@ public class BookingService {
         if (optionalBooking.isPresent()) {
             Booking booking = optionalBooking.get();
             booking.setStatus(status);
+
+            // Keep caregiverStatus in sync with booking status
+            switch (status) {
+                case "Confirmed":    booking.setCaregiverStatus("Accepted");     break;
+                case "In-Progress": booking.setCaregiverStatus("In-Progress");  break;
+                case "Completed":   booking.setCaregiverStatus("Completed");    break;
+                case "Cancelled":   booking.setCaregiverStatus("Cancelled");    break;
+                // "Pending" → leave caregiverStatus as-is (no caregiver yet)
+            }
+
             return bookingRepository.save(booking);
         }
         
