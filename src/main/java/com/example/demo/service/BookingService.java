@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -196,13 +197,13 @@ public class BookingService {
     }
 
     /**
-     * Caregiver clock in
+     * Caregiver clock in — timestamp stored in SGT (UTC+8)
      */
     public Booking clockIn(Integer id, String location) {
         Optional<Booking> optionalBooking = bookingRepository.findById(id);
         if (optionalBooking.isPresent()) {
             Booking booking = optionalBooking.get();
-            booking.setClockInTime(LocalDateTime.now());
+            booking.setClockInTime(LocalDateTime.now(ZoneId.of("Asia/Singapore")));
             booking.setClockInLocation(location);
             booking.setStatus("In-Progress");
             booking.setCaregiverStatus("In-Progress");
@@ -212,13 +213,13 @@ public class BookingService {
     }
 
     /**
-     * Caregiver clock out
+     * Caregiver clock out — timestamp stored in SGT (UTC+8)
      */
     public Booking clockOut(Integer id, String location) {
         Optional<Booking> optionalBooking = bookingRepository.findById(id);
         if (optionalBooking.isPresent()) {
             Booking booking = optionalBooking.get();
-            booking.setClockOutTime(LocalDateTime.now());
+            booking.setClockOutTime(LocalDateTime.now(ZoneId.of("Asia/Singapore")));
             booking.setClockOutLocation(location);
             booking.setStatus("Completed");
             booking.setCaregiverStatus("Completed");
